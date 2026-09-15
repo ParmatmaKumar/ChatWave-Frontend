@@ -44,6 +44,12 @@ const useWebRTC = (socket, currentUser) => {
     const remoteVideo =
         useRef(null);
 
+    const remoteAudio =
+        useRef(null);
+
+    const [mediaVersion, setMediaVersion] =
+        useState(0);
+
     const remoteUserId =
         useRef(null);
 
@@ -113,6 +119,15 @@ const useWebRTC = (socket, currentUser) => {
                     remoteStream.current;
 
             }
+
+            if (remoteAudio.current) {
+
+                remoteAudio.current.srcObject =
+                    remoteStream.current;
+
+            }
+
+            setMediaVersion((version) => version + 1);
 
         };
 
@@ -198,6 +213,8 @@ const useWebRTC = (socket, currentUser) => {
 
             localStream.current =
                 stream;
+
+            setMediaVersion((version) => version + 1);
 
 
             // Local video
@@ -730,6 +747,13 @@ const useWebRTC = (socket, currentUser) => {
 
         }
 
+            if (remoteAudio.current) {
+
+                remoteAudio.current.srcObject =
+                null;
+
+            }
+
 
         remoteStream.current =
             null;
@@ -753,6 +777,31 @@ const useWebRTC = (socket, currentUser) => {
         setIncomingCall(null);
 
     };
+
+    useEffect(() => {
+
+        if (localVideo.current && localStream.current) {
+
+            localVideo.current.srcObject =
+                localStream.current;
+
+        }
+
+        if (remoteVideo.current && remoteStream.current) {
+
+            remoteVideo.current.srcObject =
+                remoteStream.current;
+
+        }
+
+        if (remoteAudio.current && remoteStream.current) {
+
+            remoteAudio.current.srcObject =
+                remoteStream.current;
+
+        }
+
+    }, [mediaVersion, isCalling, isInCall, callType]);
 
 
     // ==============================
@@ -982,6 +1031,8 @@ const useWebRTC = (socket, currentUser) => {
         localVideo,
 
         remoteVideo,
+
+        remoteAudio,
 
     };
 

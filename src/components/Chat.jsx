@@ -41,6 +41,7 @@ const Chat = ({ currentUser, selectedUser, onBack }) => {
     callType,
     localVideo,
     remoteVideo,
+    remoteAudio,
   } = useWebRTC(socket, currentUser);
 
   useEffect(() => {
@@ -514,6 +515,7 @@ const Chat = ({ currentUser, selectedUser, onBack }) => {
       {/* Active audio */}
       {isInCall && callType === "audio" && (
         <div className="fixed bottom-4 right-4 z-[80] rounded-2xl border border-line bg-panel px-4 py-3 shadow-xl sm:bottom-6 sm:right-6 sm:px-5 sm:py-4">
+          <audio ref={remoteAudio} autoPlay />
           <div className="flex items-center gap-4">
             <div>
               <p className="text-sm font-semibold text-ink">Audio call</p>
