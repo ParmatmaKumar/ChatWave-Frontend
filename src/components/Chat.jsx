@@ -6,8 +6,6 @@ import {
   FiSend,
   FiSmile,
   FiPhoneOff,
-  FiCheck,
-  FiX,
   FiMoreVertical,
   FiTrash2,
   FiCornerUpLeft,
@@ -23,10 +21,7 @@ const Chat = ({
   onBack,
   startCall,
   startVideoCall,
-  acceptCall,
-  rejectCall,
   endCall,
-  incomingCall,
   isCalling,
   isInCall,
   callType,
@@ -277,7 +272,7 @@ const Chat = ({
               {selectedUser.name}
             </h2>
             <p className="text-xs font-medium text-brand-600">
-              {typing ? "typing..." : "..."}
+              {typing ? "typing..." : ""}
             </p>
           </div>
         </div>
@@ -479,46 +474,6 @@ const Chat = ({
           </div>
         </div>
       </div>
-
-      {/* Incoming call */}
-      {incomingCall && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl border border-line bg-panel p-7 text-center shadow-2xl">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-100 text-brand-700 animate-pulse">
-              {incomingCall.callType === "video" ? (
-                <FiVideo className="h-8 w-8" />
-              ) : (
-                <FiPhone className="h-8 w-8" />
-              )}
-            </div>
-            <h2 className="mt-5 text-xl font-bold text-ink">
-              {incomingCall.callerName}
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Incoming {incomingCall.callType === "video" ? "video" : "audio"}{" "}
-              call...
-            </p>
-            <div className="mt-7 flex gap-3">
-              <button
-                type="button"
-                onClick={rejectCall}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 py-3 text-sm font-bold text-white transition hover:bg-red-700"
-              >
-                <FiX className="h-4 w-4" />
-                Reject
-              </button>
-              <button
-                type="button"
-                onClick={acceptCall}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
-              >
-                <FiCheck className="h-4 w-4" />
-                Accept
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Outgoing audio */}
       {isCalling && callType === "audio" && (

@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { FiLogOut, FiMessageCircle } from "react-icons/fi";
+import {
+  FiCheck,
+  FiLogOut,
+  FiMessageCircle,
+  FiPhone,
+  FiVideo,
+  FiX,
+} from "react-icons/fi";
 import { useSocket } from "./context/SocketContext";
 import useWebRTC from "./hooks/useWebRTC";
 
@@ -34,6 +41,64 @@ function App() {
     setSelectedUser(selectedCallUser);
     callStarter(selectedCallUser._id, selectedCallUser.name);
   };
+
+  const acceptIncomingCall = () => {
+    if (incomingCall) {
+      setSelectedUser({
+        _id: incomingCall.from,
+        name: incomingCall.callerName,
+      });
+    }
+
+    acceptCall();
+  };
+
+  useEffect(() => {
+    if (!incomingCall) return undefined;
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return undefined;
+
+    const audioContext = new AudioContext();
+    let stopped = false;
+    let timeoutId;
+
+    const ring = () => {
+      if (stopped) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(
+        660,
+        audioContext.currentTime + 0.22
+      );
+      gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.18,
+        audioContext.currentTime + 0.02
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audioContext.currentTime + 0.42
+      );
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.45);
+      timeoutId = window.setTimeout(ring, 900);
+    };
+
+    audioContext.resume().catch(() => {});
+    ring();
+
+    return () => {
+      stopped = true;
+      window.clearTimeout(timeoutId);
+      audioContext.close().catch(() => {});
+    };
+  }, [incomingCall]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -130,10 +195,7 @@ function App() {
             onBack={() => setSelectedUser(null)}
             startCall={startCall}
             startVideoCall={startVideoCall}
-            acceptCall={acceptCall}
-            rejectCall={rejectCall}
             endCall={endCall}
-            incomingCall={incomingCall}
             isCalling={isCalling}
             isInCall={isInCall}
             callType={callType}
@@ -143,6 +205,44 @@ function App() {
           />
         </main>
       </div>
+
+      {incomingCall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-line bg-panel p-7 text-center shadow-2xl">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-100 text-brand-700 animate-pulse">
+              {incomingCall.callType === "video" ? (
+                <FiVideo className="h-8 w-8" />
+              ) : (
+                <FiPhone className="h-8 w-8" />
+              )}
+            </div>
+            <h2 className="mt-5 text-xl font-bold text-ink">
+              {incomingCall.callerName}
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Incoming {incomingCall.callType === "video" ? "video" : "audio"} call...
+            </p>
+            <div className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={rejectCall}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+              >
+                <FiX className="h-4 w-4" />
+                Reject
+              </button>
+              <button
+                type="button"
+                onClick={acceptIncomingCall}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white transition hover:bg-brand-700"
+              >
+                <FiCheck className="h-4 w-4" />
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
