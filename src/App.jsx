@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiLogOut, FiMessageCircle } from "react-icons/fi";
+import { useSocket } from "./context/SocketContext";
+import useWebRTC from "./hooks/useWebRTC";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -12,6 +14,26 @@ function App() {
   const [user, setUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const socket = useSocket();
+  const {
+    startCall,
+    startVideoCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    incomingCall,
+    isCalling,
+    isInCall,
+    callType,
+    localVideo,
+    remoteVideo,
+    remoteAudio,
+  } = useWebRTC(socket, user);
+
+  const callUser = (selectedCallUser, callStarter) => {
+    setSelectedUser(selectedCallUser);
+    callStarter(selectedCallUser._id, selectedCallUser.name);
+  };
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -87,6 +109,12 @@ function App() {
             currentUser={user}
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
+            onAudioCall={(selectedCallUser) =>
+              callUser(selectedCallUser, startCall)
+            }
+            onVideoCall={(selectedCallUser) =>
+              callUser(selectedCallUser, startVideoCall)
+            }
           />
         </aside>
 
@@ -100,6 +128,18 @@ function App() {
             currentUser={user}
             selectedUser={selectedUser}
             onBack={() => setSelectedUser(null)}
+            startCall={startCall}
+            startVideoCall={startVideoCall}
+            acceptCall={acceptCall}
+            rejectCall={rejectCall}
+            endCall={endCall}
+            incomingCall={incomingCall}
+            isCalling={isCalling}
+            isInCall={isInCall}
+            callType={callType}
+            localVideo={localVideo}
+            remoteVideo={remoteVideo}
+            remoteAudio={remoteAudio}
           />
         </main>
       </div>

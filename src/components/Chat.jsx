@@ -14,10 +14,25 @@ import {
 } from "react-icons/fi";
 
 import { useSocket } from "../context/SocketContext";
-import useWebRTC from "../hooks/useWebRTC";
 import api from "../services/api";
 
-const Chat = ({ currentUser, selectedUser, onBack }) => {
+const Chat = ({
+  currentUser,
+  selectedUser,
+  onBack,
+  startCall,
+  startVideoCall,
+  acceptCall,
+  rejectCall,
+  endCall,
+  incomingCall,
+  isCalling,
+  isInCall,
+  callType,
+  localVideo,
+  remoteVideo,
+  remoteAudio,
+}) => {
   const socket = useSocket();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -28,21 +43,6 @@ const Chat = ({ currentUser, selectedUser, onBack }) => {
   const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   });
-
-  const {
-    startCall,
-    startVideoCall,
-    acceptCall,
-    rejectCall,
-    endCall,
-    incomingCall,
-    isCalling,
-    isInCall,
-    callType,
-    localVideo,
-    remoteVideo,
-    remoteAudio,
-  } = useWebRTC(socket, currentUser);
 
   useEffect(() => {
     if (!selectedUser) return;

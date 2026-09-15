@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import { FiPhone, FiSearch, FiVideo } from "react-icons/fi";
 import api from "../services/api";
 import { useSocket } from "../context/SocketContext";
 
-const UserList = ({ currentUser, selectedUser, setSelectedUser }) => {
+const UserList = ({
+  currentUser,
+  selectedUser,
+  setSelectedUser,
+  onAudioCall,
+  onVideoCall,
+}) => {
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [query, setQuery] = useState("");
@@ -119,6 +125,55 @@ const UserList = ({ currentUser, selectedUser, setSelectedUser }) => {
                   >
                     {isOnline ? "Online" : "Offline"}
                   </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onAudioCall(user);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onAudioCall(user);
+                      }
+                    }}
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${
+                      isActive
+                        ? "text-white hover:bg-white/15"
+                        : "text-brand-700 hover:bg-brand-100"
+                    }`}
+                    title={`Audio call ${user.name}`}
+                  >
+                    <FiPhone className="h-4 w-4" />
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onVideoCall(user);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onVideoCall(user);
+                      }
+                    }}
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${
+                      isActive
+                        ? "text-white hover:bg-white/15"
+                        : "text-sky-700 hover:bg-sky-50"
+                    }`}
+                    title={`Video call ${user.name}`}
+                  >
+                    <FiVideo className="h-4 w-4" />
+                  </span>
                 </div>
               </button>
             );
