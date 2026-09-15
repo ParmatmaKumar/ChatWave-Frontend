@@ -15,6 +15,7 @@ import {
 
 import { useSocket } from "../context/SocketContext";
 import api from "../services/api";
+import EmojiPicker from "./EmojiPicker";
 
 const Chat = ({
   currentUser,
@@ -38,7 +39,9 @@ const Chat = ({
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
   const [menuId, setMenuId] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const bottomRef = useRef(null);
+  const emojiPickerRef = useRef(null);
 
   const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -114,6 +117,24 @@ const Chat = ({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
+
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+
+    const handleOutsideClick = (event) => {
+      if (!emojiPickerRef.current?.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [showEmojiPicker]);
+
+  const handleEmojiSelect = (emoji) => {
+    setText((currentText) => `${currentText}${emoji}`);
+    setShowEmojiPicker(false);
+  };
 
   const sendMessage = async () => {
     if (!text.trim() || !selectedUser) return;
@@ -256,7 +277,7 @@ const Chat = ({
               {selectedUser.name}
             </h2>
             <p className="text-xs font-medium text-brand-600">
-              {typing ? "typing..." : "Online"}
+              {typing ? "typing..." : "..."}
             </p>
           </div>
         </div>
@@ -416,38 +437,46 @@ const Chat = ({
 
       {/* Composer */}
       <div className="shrink-0 border-t border-line bg-panel px-3 py-3 sm:px-4 sm:py-3.5 md:px-5">
-        <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-2 py-1.5 sm:gap-3 sm:px-3 sm:py-2">
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-panel hover:text-brand-700"
-            title="Emoji"
-          >
-            <FiSmile className="h-5 w-5" />
-          </button>
+        <div className="relative" ref={emojiPickerRef}>
+          {showEmojiPicker && <EmojiPicker onSelect={handleEmojiSelect} />}
+          <div className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-2 py-1.5 sm:gap-3 sm:px-3 sm:py-2">
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker((isOpen) => !isOpen)}
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition hover:bg-panel hover:text-brand-700 ${
+                showEmojiPicker ? "bg-panel text-brand-700" : ""
+              }`}
+              title="Emoji"
+              aria-label="Open emoji picker"
+              aria-expanded={showEmojiPicker}
+            >
+              <FiSmile className="h-5 w-5" />
+            </button>
 
-          <input
-            type="text"
-            placeholder="Type a message..."
-            value={text}
-            onChange={handleTyping}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-ink outline-none placeholder:text-muted"
-          />
+            <input
+              type="text"
+              placeholder="Type a message..."
+              value={text}
+              onChange={handleTyping}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              className="min-w-0 flex-1 bg-transparent py-2 text-sm text-ink outline-none placeholder:text-muted"
+            />
 
-          <button
-            type="button"
-            onClick={sendMessage}
-            disabled={!text.trim()}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:h-11 sm:w-11"
-            title="Send"
-          >
-            <FiSend className="h-4 w-4" />
-          </button>
+            <button
+              type="button"
+              onClick={sendMessage}
+              disabled={!text.trim()}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:h-11 sm:w-11"
+              title="Send"
+            >
+              <FiSend className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
