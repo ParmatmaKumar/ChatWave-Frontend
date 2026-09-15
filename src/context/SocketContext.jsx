@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
 
         const newSocket = io(
-            import.meta.env.SOCKET_URL || "http://localhost:8000"
+            import.meta.env.VITE_SOCKET_URL || "http://localhost:8000"
         );
 
         setSocket(newSocket);
